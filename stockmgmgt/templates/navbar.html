@@ -1,0 +1,67 @@
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+    <a class="navbar-brand" href="/">Controle de Estoque</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+                <a class="nav-link" href="/">Página Inicial <span class="sr-only">(current)</span></a>
+            </li>
+            {% if request.user.is_authenticated %}
+            <li class="nav-item">
+                <!--<a class="nav-link" href="/list_items">Lista de Itens</a>-->
+            </li>
+            <li class="nav-item">
+                <!--<a class="nav-link" href="/add_items">Adicionar Itens</a>-->
+            </li>
+            {% endif %}
+        </ul>
+        <ul class="navbar-nav">
+            {% if request.user.is_authenticated %}
+            <li>
+                <form action="{% url 'logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">{{ user }} | Logout</button>
+                </form>
+            </li>
+            {% else %}
+            <li><a href="{% url 'login' %}">Login</a></li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>
+
+<a href="#">
+    <div id="version-display" data-toggle="modal" data-target="#myModal">CDE Ver: 1.0</div>
+</a>
+<div id="myModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">PI GRUPO DRP12-PJI110-SALA-001-GRUPO-001</h4>
+            </div>
+            <div class="modal-body">
+                <div class="dev-info">
+                    <br><br>
+                    <p class=""><b>SISTEMA DE CONTROLE DE ESTOQUE</b></p>
+                    <p>VERSÃO: 1.0</p>
+                    <br><br><br>
+                    <p>DESENVOLVEDORES</p>                    
+                    <p class="modal-header">DESENVOLVEDORES</p>                                      
+                    <p>ALEX FLORIANO PEREIRA DA SILVA</p>
+                    <p>VINICIUS ALEXANDRE PINTO</p>
+                    <p>RAFAEL CARLOS DE SOUZA ASSUNÇÃO</p>
+                    <p>WILLIAM DO NASCIMENTO PEÇA</p>
+                    <p>RAFAEL ZANCO</p>
+                    <a href="https://univesp.br" target="_blank">
+                        <p><img class="dev-info-logo" src="/static/img/logo.png" alt="Developer Logo"></p>
+                    </a>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
