@@ -27,7 +27,7 @@ class Stock(models.Model):
 	expiration_date = models.DateField(blank=False, null=True)  # Adicionando o campo da data de validade
 	#timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
 	#date = models.DateTimeField(auto_now_add=False, auto_now=False)
-
+	barcode = models.CharField(max_length=50, unique=True, blank=False, null=True)
 
 	def __str__(self):
 		return self.item_name + ' ' + str(self.quantity)
