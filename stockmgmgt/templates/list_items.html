@@ -87,7 +87,7 @@
                             {% for instance in queryset %}
                             <tr>
                                 <td>{{ instance.category }}</td>
-                                <td><a href="{% url 'update_items' instance.id %}">{{ instance.item_name }}</a></td>
+                                <td><a>{{ instance.item_name }}</a></td>
                                 <td>
                                     {% if instance.quantity <= instance.reorder_level %}
                                     <div style="background-color: orange;">
