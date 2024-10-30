@@ -38,4 +38,7 @@ urlpatterns = [
     path('accounts/', include('registration.backends.default.urls')),
     path('accounts/logout/', auth_views.LogoutView.as_view(next_page='/'), name='logout'),
     path('accounts/login/', auth_views.LoginView.as_view(), name='login'),
+    path('', views.home, name='home'),
+    path('list_items/', views.list_items, name='list_items'),
+    path('barcode_items/', views.barcode_items, name='barcode_items'),
 ]   
