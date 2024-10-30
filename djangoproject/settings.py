@@ -25,14 +25,13 @@ SECRET_KEY = 'django-insecure-b4y_l)n0=8hhip&fxxr#l50%-!nm^fo%7%=bu0f%vq0k6_z!$$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = []  # Deixe vazio para permitir localhost
 
 
 # Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
-    'registration',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -40,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'crispy_forms',
     'crispy_bootstrap4',
-    'stockmgmgt'
+    'stockmgmgt',
+    'registration',  # Certifique-se de que o app de registro está instalado
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
@@ -78,22 +78,13 @@ TEMPLATES = [
 WSGI_APPLICATION = 'djangoproject.wsgi.application'
 
 
- #Database
- #https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-
-#DATABASES = {
- #  'default': {
-  #     'ENGINE': 'django.db.backends.sqlite3',
-   #    'NAME': BASE_DIR / 'db.sqlite3',
-    #}
-#}
+# Database
+# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'stockmgmgt',
-        'USER': 'teste',
-        'PASSWORD': '987654321',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',  # O nome do arquivo do banco de dados SQLite
     }
 }
 
@@ -131,7 +122,6 @@ USE_L10N = True
 USE_TZ = True
 
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
@@ -146,12 +136,3 @@ ACCOUNT_ACTIVATION_DAYS = 7
 REGISTRATION_AUTO_LOGIN = True
 SITE_ID = 1
 LOGIN_REDIRECT_URL = '/'
-
-# Configurações de E-mail
-#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-#EMAIL_HOST = 'smtp.live.com'  # Servidor SMTP do Hotmail
-#EMAIL_PORT = 587
-#EMAIL_USE_TLS = True
-#EMAIL_HOST_USER = 'zanco-rafael@hotmail.com'  # Seu endereço de e-mail do Hotmail
-#EMAIL_HOST_PASSWORD = 'D@rkside7@'  # Sua senha do Hotmail
-
