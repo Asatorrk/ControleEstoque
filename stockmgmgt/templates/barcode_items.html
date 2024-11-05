@@ -37,8 +37,32 @@
                 // Espera um pequeno tempo antes de focar novamente
                 setTimeout(focusBarcodeInput, 100);
             });
+
+            // Função para remover item da lista temporária
+            $('.delete-item').on('click', function(event) {
+                event.preventDefault();
+                const itemId = $(this).data('id');  // Obtém o ID do item a ser removido
+                $(this).closest('tr').remove();  // Remove a linha da tabela
+
+                // Aqui você pode adicionar um código para enviar uma requisição ao backend
+                // se precisar persistir a remoção no banco de dados antes de finalizar
+            });
         });
     </script>
+    <style>
+        /* Estilizando o botão Excluir */
+        .btn-delete {
+            background-color: #d9534f;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn-delete:hover {
+            background-color: #c9302c;
+        }
+    </style>
 </head>
 <body>
     {% include 'navbar.html' %}
@@ -67,8 +91,9 @@
                     <thead>
                         <tr>
                             <th>Código de Barras</th>
-                            <th>NOME ITEM</th>
-                            <th>QUANTIDADE</th>
+                            <th>Nome do Item</th>
+                            <th>Quantidade</th>
+                            <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -77,6 +102,9 @@
                             <td>{{ entry.barcode }}</td>
                             <td>{{ entry.item_name }}</td>
                             <td>1</td>  <!-- Cada entrada é um item, então a quantidade é 1 -->
+                            <td>
+                                <button class="btn-delete delete-item" data-id="{{ entry.id }}">Excluir</button>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
