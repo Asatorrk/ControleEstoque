@@ -22,7 +22,7 @@ def list_items(request):
     form = StockSearchForm(request.POST or None)
     queryset = Stock.objects.all()
     selected_items = []
-    total_quantity = 0
+    total_quantity = 20
 
     # Limpa a lista de itens na sessão quando acessar a página de listagem de itens
     if 'items_list' in request.session:
@@ -167,6 +167,7 @@ def barcode_items(request):
     items_list = request.session['items_list']
 
     if request.method == 'POST':
+        # Adiciona um item pela leitura do código de barras
         if form.is_valid():
             barcode = form.cleaned_data.get('barcode')
             try:
@@ -177,7 +178,20 @@ def barcode_items(request):
             except Stock.DoesNotExist:
                 messages.error(request, 'Item não encontrado com esse código de barras.')
 
+        # Remove uma unidade do item específico ao clicar no botão de exclusão
+        if 'remove_item' in request.POST:
+            barcode_to_remove = request.POST.get('remove_item')
+            # Encontra e remove a primeira ocorrência do item com o código de barras
+            for i, item in enumerate(items_list):
+                if item['barcode'] == barcode_to_remove:
+                    del items_list[i]
+                    break
+            request.session['items_list'] = items_list
+            messages.success(request, 'Item removido da lista.')
+
+        # Finalizar a operação
         if 'finalize_items' in request.POST:
+            # Mantém o mesmo processamento de finalização da operação
             item_counts = {}
             for item in items_list:
                 barcode = item['barcode']
@@ -214,3 +228,23 @@ def barcode_items(request):
         'items_list': items_list,
     }
     return render(request, 'barcode_items.html', context)
+
+
+
+@login_required
+def remove_item_from_list(request, barcode):
+    if request.method == 'POST':
+        # Obtém a lista de itens da sessão
+        items_list = request.session.get('items_list', [])
+
+        # Remove o item específico da lista
+        items_list = [item for item in items_list if item['barcode'] != barcode]
+
+        # Atualiza a sessão com a lista alterada
+        request.session['items_list'] = items_list
+
+        # Exibe mensagem de sucesso
+        messages.success(request, 'Item removido da lista com sucesso.')
+
+    # Redireciona de volta para a página de controle de código de barras
+    return redirect('barcode_items')
