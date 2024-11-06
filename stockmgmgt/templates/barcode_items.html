@@ -11,28 +11,34 @@
     <link href="{% static 'css/stylesheet.css' %}" rel="stylesheet">
     <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
-    <script>
+        <script>
         $(document).ready(function() {
-            // Foca no campo de código de barras ao carregar a página
-            focusBarcodeInput();
-            // Captura o evento de entrada no campo de código de barras
-            $('#id_barcode').on('input', function() {
-                // Se o campo não estiver vazio, envia o formulário
-                if ($(this).val().length > 0) {
-                    $(this).closest('form').submit();
-                }
-            });
-            // Função para manter o foco no campo de código de barras
-            function focusBarcodeInput() {
-                $('#id_barcode').focus();
+        // Foca no campo de código de barras ao carregar a página
+        focusAndSelectBarcodeInput();
+
+        // Captura o evento de entrada no campo de código de barras
+        $('#id_barcode').on('input', function() {
+            // Se o campo não estiver vazio, envia o formulário
+            if ($(this).val().length > 0) {
+                $(this).closest('form').submit();
             }
-            // Redefine o foco após o envio do formulário
-            $('form').on('submit', function() {
-                // Espera um pequeno tempo antes de focar novamente
-                setTimeout(focusBarcodeInput, 100);
-            });
         });
-    </script>
+
+        // Função para manter o foco e selecionar o conteúdo do campo de código de barras
+        function focusAndSelectBarcodeInput() {
+            const barcodeInput = $('#id_barcode');
+            barcodeInput.focus();       // Foca no campo
+            barcodeInput.select();      // Seleciona o conteúdo do campo para ser sobrescrito
+        }
+
+        // Redefine o foco e a seleção após o envio do formulário
+        $('form').on('submit', function() {
+            // Aguarda um breve momento antes de redefinir o foco e selecionar o campo
+            setTimeout(focusAndSelectBarcodeInput, 100);
+        });
+    });
+        </script>
+
 </head>
 <body>
     {% include 'navbar.html' %}
