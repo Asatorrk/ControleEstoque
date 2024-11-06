@@ -1,24 +1,20 @@
 {% load static %}
 {% load crispy_forms_filters %}
 {% load custom_filters %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, shrink-to-fit=no">
     <title>Código de Barras</title>
-
     <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
     <link href="{% static 'css/stylesheet.css' %}" rel="stylesheet">
-
     <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
     <script>
         $(document).ready(function() {
             // Foca no campo de código de barras ao carregar a página
             focusBarcodeInput();
-
             // Captura o evento de entrada no campo de código de barras
             $('#id_barcode').on('input', function() {
                 // Se o campo não estiver vazio, envia o formulário
@@ -26,47 +22,20 @@
                     $(this).closest('form').submit();
                 }
             });
-
             // Função para manter o foco no campo de código de barras
             function focusBarcodeInput() {
                 $('#id_barcode').focus();
             }
-
             // Redefine o foco após o envio do formulário
             $('form').on('submit', function() {
                 // Espera um pequeno tempo antes de focar novamente
                 setTimeout(focusBarcodeInput, 100);
             });
-
-            // Função para remover item da lista temporária
-            $('.delete-item').on('click', function(event) {
-                event.preventDefault();
-                const itemId = $(this).data('id');  // Obtém o ID do item a ser removido
-                $(this).closest('tr').remove();  // Remove a linha da tabela
-
-                // Aqui você pode adicionar um código para enviar uma requisição ao backend
-                // se precisar persistir a remoção no banco de dados antes de finalizar
-            });
         });
     </script>
-    <style>
-        /* Estilizando o botão Excluir */
-        .btn-delete {
-            background-color: #d9534f;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .btn-delete:hover {
-            background-color: #c9302c;
-        }
-    </style>
 </head>
 <body>
     {% include 'navbar.html' %}
-
     <main role="main" class="container">
         {% if messages %}
         <ul class="messages">
@@ -75,25 +44,21 @@
             {% endfor %}
         </ul>
         {% endif %}
-
         <div class="jumbotron">
             <div class="header">{{ header }}</div>
-
             <form method="POST">
                 {% csrf_token %}
                 {{ form.as_p }}
                 <button type="submit" class="btn btn-primary" style="display:none;">Adicionar</button>
             </form>
-
             <h3>Itens a Retirar</h3>
             <div class="display_table">
                 <table class='table'>
                     <thead>
                         <tr>
                             <th>Código de Barras</th>
-                            <th>Nome do Item</th>
-                            <th>Quantidade</th>
-                            <th>Ações</th>
+                            <th>NOME ITEM</th>
+                            <th>QUANTIDADE</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -102,15 +67,11 @@
                             <td>{{ entry.barcode }}</td>
                             <td>{{ entry.item_name }}</td>
                             <td>1</td>  <!-- Cada entrada é um item, então a quantidade é 1 -->
-                            <td>
-                                <button class="btn-delete delete-item" data-id="{{ entry.id }}">Excluir</button>
-                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
-
             <form method="POST">
                 {% csrf_token %}
                 <button type="submit" name="finalize_items" class="btn btn-success">Finalizar</button>
