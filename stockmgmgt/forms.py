@@ -85,3 +85,9 @@ class ReorderLevelForm(forms.ModelForm):
 
 class BarcodeForm(forms.Form):
     barcode = forms.CharField(max_length=50, required=True, label='Código de Barras')
+
+
+class StockSearchForm(forms.Form):
+    # Campo para pesquisa de itens
+    search = forms.CharField(max_length=50, required=False, label="Pesquisar")
+
