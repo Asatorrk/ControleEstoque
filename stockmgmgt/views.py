@@ -19,8 +19,8 @@ def home(request):
 @login_required
 def list_items(request):
     header = 'Lista de Itens'
-    form = StockSearchForm(request.POST or None)
-    queryset = Stock.objects.all()
+    form = StockSearchForm(request.GET or None)  # Alterando para usar GET
+    queryset = Stock.objects.all()  # Inicia com todos os itens
     selected_items = []
     total_quantity = 20
 
@@ -28,33 +28,16 @@ def list_items(request):
     if 'items_list' in request.session:
         del request.session['items_list']
 
-    if request.method == 'POST':
-        if 'barcode_item' in request.POST:
-            barcode = request.POST.get('barcode')
-            try:
-                item = Stock.objects.get(barcode=barcode)
-                selected_items.append(item)
-                total_quantity += item.quantity
-                messages.success(request, f'Item {item.item_name} adicionado à lista.')
-            except Stock.DoesNotExist:
-                messages.error(request, 'Item não encontrado com esse código de barras.')
-
-        if 'selected_items' in request.POST:
-            selected_barcodes = request.POST.getlist('selected_items[]')
-            for barcode in selected_barcodes:
-                try:
-                    item = Stock.objects.get(barcode=barcode)
-                    item.quantity -= 1
-                    item.save()
-                except Stock.DoesNotExist:
-                    continue
-
-            return HttpResponse(status=204)
+    # Processamento do formulário de pesquisa
+    if form.is_valid():
+        search_query = form.cleaned_data.get('search')
+        if search_query:
+            queryset = queryset.filter(item_name__icontains=search_query)  # Filtra pelo nome do item
 
     context = {
         "form": form,
         "header": header,
-        "queryset": queryset,
+        "queryset": queryset,  # Passando os itens filtrados
         "selected_items": selected_items,
         "total_quantity": total_quantity,
     }
@@ -111,9 +94,17 @@ def issue_items(request, pk):
     form = IssueForm(request.POST or None, instance=queryset)
     if form.is_valid():
         instance = form.save(commit=False)
+        
+        # Verifica se a quantidade a ser retirada é maior do que a quantidade disponível
+        if instance.issue_quantity > instance.quantity:
+            messages.error(request, "Quantidade insuficiente em estoque. Não foi possível realizar a retirada.")
+            return redirect('/stock_detail/' + str(instance.id))
+        
+        # Realiza a retirada, pois a quantidade é válida
         instance.quantity -= instance.issue_quantity
-        messages.success(request, "Retirado com sucesso. " + str(instance.quantity) + " " + str(instance.item_name) + "s restante no estoque")
         instance.save()
+        messages.success(request, f"{instance.issue_quantity} unidades de {instance.item_name} retiradas com sucesso. Quantidade restante: {instance.quantity}")
+        
         return redirect('/stock_detail/' + str(instance.id))
 
     context = {
@@ -123,6 +114,7 @@ def issue_items(request, pk):
         "username": 'Issue By: ' + str(request.user),
     }
     return render(request, "add_items.html", context)
+
 
 def receive_items(request, pk):
     queryset = Stock.objects.get(id=pk)
