@@ -14,7 +14,9 @@
 
     Miguel Marine
 
-    Rodrigo Botelho
+    Luiz Natali 
+
+    Gabriel Alves
     
 
 ***link do projeto >>>>> https://integradorprojeto.pythonanywhere.com/
