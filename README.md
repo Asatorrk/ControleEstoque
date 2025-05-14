@@ -27,14 +27,21 @@
 ***Video de apresentação do projeto >>>>> 
 
 
-![image](https://github.com/user-attachments/assets/aca0747b-7236-43b4-820d-c8ba2cd34fb1)
-![image](https://github.com/user-attachments/assets/a52d328c-d6a5-4c66-bb48-593cd53e1238)
-![image](https://github.com/user-attachments/assets/e7795b58-f12a-41b6-8c21-0c88283514e3)
-![image](https://github.com/user-attachments/assets/365908f5-865e-4231-a83e-5a421bafc4a9)
-![image](https://github.com/user-attachments/assets/d04f7a8a-0c46-4b9d-959e-2c66e888909b)
-![image](https://github.com/user-attachments/assets/9bbafe26-ca2b-4488-955e-4bd9de56c362)
-![image](https://github.com/user-attachments/assets/7c7d0a1e-dd5a-47f7-a278-05655604d225)
-![image](https://github.com/user-attachments/assets/6a34dfd5-8f82-4cbc-924e-06bcfd64185d)
+![image](https://github.com/user-attachments/assets/6fcf8b56-9e05-4ee7-b458-1dcb872c6f42)
+![image](https://github.com/user-attachments/assets/ad387f79-65bc-4876-8055-0f14d3e1af72)
+![image](https://github.com/user-attachments/assets/654230ae-550d-4094-b536-361157288ef0)
+![image](https://github.com/user-attachments/assets/4c93fe1f-097c-4622-9423-6c2df8d8a6db)
+![image](https://github.com/user-attachments/assets/0a65c4d6-ea1d-4a88-97c6-cc8db5929ed0)
+![image](https://github.com/user-attachments/assets/fe3f75d7-e13a-47de-a314-a39211a7afba)
+![image](https://github.com/user-attachments/assets/4fe5cc02-a5e2-4906-b8ba-6aa9115daaa8)
+
+
+
+
+
+
+
+
 
 
 
