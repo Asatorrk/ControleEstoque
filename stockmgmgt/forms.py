@@ -1,5 +1,6 @@
 from django import forms
 from .models import Stock
+from .models import Cliente
 
 class StockCreateForm(forms.ModelForm):
     class Meta:
@@ -85,9 +86,21 @@ class ReorderLevelForm(forms.ModelForm):
 
 class BarcodeForm(forms.Form):
     barcode = forms.CharField(max_length=50, required=True, label='Código de Barras')
-
-
+    
+    
+    
 class StockSearchForm(forms.Form):
     # Campo para pesquisa de itens
-    search = forms.CharField(max_length=50, required=False, label="Pesquisar")
+    search = forms.CharField(max_length=100, required=False, label="Pesquisar")
+
+
+class ClienteForm(forms.ModelForm):
+    class Meta:
+        model = Cliente
+        fields = ['nome', 'email', 'telefone', 'cep', 'endereco', 'numero', 'complemento', 'bairro', 'cidade', 'estado']  # Ajuste os campos conforme seu modelo
+
+def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['complemento'].required = False        
+        
 

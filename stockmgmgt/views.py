@@ -4,6 +4,20 @@ from django.contrib import messages
 from .models import *
 from .forms import *
 from django.contrib.auth.decorators import login_required
+import matplotlib
+matplotlib.use('Agg')  # Força o Matplotlib a usar um backend não interativo
+import matplotlib.pyplot as plt
+from .models import Stock
+from django.db import connection
+import io
+import base64
+import pandas as pd
+from django.http import HttpResponse, JsonResponse
+import requests
+import json
+from datetime import datetime
+
+
 
 # Create your views here.
 
@@ -19,8 +33,8 @@ def home(request):
 @login_required
 def list_items(request):
     header = 'Lista de Itens'
-    form = StockSearchForm(request.GET or None)  # Alterando para usar GET
-    queryset = Stock.objects.all()  # Inicia com todos os itens
+    form = StockSearchForm(request.POST or None)
+    queryset = Stock.objects.all()
     selected_items = []
     total_quantity = 20
 
@@ -28,16 +42,33 @@ def list_items(request):
     if 'items_list' in request.session:
         del request.session['items_list']
 
-    # Processamento do formulário de pesquisa
-    if form.is_valid():
-        search_query = form.cleaned_data.get('search')
-        if search_query:
-            queryset = queryset.filter(item_name__icontains=search_query)  # Filtra pelo nome do item
+    if request.method == 'POST':
+        if 'barcode_item' in request.POST:
+            barcode = request.POST.get('barcode')
+            try:
+                item = Stock.objects.get(barcode=barcode)
+                selected_items.append(item)
+                total_quantity += item.quantity
+                messages.success(request, f'Item {item.item_name} adicionado à lista.')
+            except Stock.DoesNotExist:
+                messages.error(request, 'Item não encontrado com esse código de barras.')
+
+        if 'selected_items' in request.POST:
+            selected_barcodes = request.POST.getlist('selected_items[]')
+            for barcode in selected_barcodes:
+                try:
+                    item = Stock.objects.get(barcode=barcode)
+                    item.quantity -= 1
+                    item.save()
+                except Stock.DoesNotExist:
+                    continue
+
+            return HttpResponse(status=204)
 
     context = {
         "form": form,
         "header": header,
-        "queryset": queryset,  # Passando os itens filtrados
+        "queryset": queryset,
         "selected_items": selected_items,
         "total_quantity": total_quantity,
     }
@@ -94,17 +125,9 @@ def issue_items(request, pk):
     form = IssueForm(request.POST or None, instance=queryset)
     if form.is_valid():
         instance = form.save(commit=False)
-        
-        # Verifica se a quantidade a ser retirada é maior do que a quantidade disponível
-        if instance.issue_quantity > instance.quantity:
-            messages.error(request, "Quantidade insuficiente em estoque. Não foi possível realizar a retirada.")
-            return redirect('/stock_detail/' + str(instance.id))
-        
-        # Realiza a retirada, pois a quantidade é válida
         instance.quantity -= instance.issue_quantity
+        messages.success(request, "Retirado com sucesso. " + str(instance.quantity) + " " + str(instance.item_name) + "s restante no estoque")
         instance.save()
-        messages.success(request, f"{instance.issue_quantity} unidades de {instance.item_name} retiradas com sucesso. Quantidade restante: {instance.quantity}")
-        
         return redirect('/stock_detail/' + str(instance.id))
 
     context = {
@@ -114,7 +137,6 @@ def issue_items(request, pk):
         "username": 'Issue By: ' + str(request.user),
     }
     return render(request, "add_items.html", context)
-
 
 def receive_items(request, pk):
     queryset = Stock.objects.get(id=pk)
@@ -240,3 +262,138 @@ def remove_item_from_list(request, barcode):
 
     # Redireciona de volta para a página de controle de código de barras
     return redirect('barcode_items')
+
+
+def relatorio_itens_retirados(request):
+    # Obter parâmetros de filtro
+    data_inicio = request.GET.get('data_inicio')
+    data_fim = request.GET.get('data_fim')
+    top_n = request.GET.get('top_n', '10')  # Garante que recebe uma string
+
+    # Converte `top_n` para inteiro
+    try:
+        top_n = int(top_n)
+    except ValueError:
+        top_n = 10  # Se for inválido, usa o valor padrão
+
+    # Construir filtros dinâmicos
+    params = []
+    filters = []
+
+    if data_inicio:
+        try:
+            data_inicio = datetime.strptime(data_inicio, "%Y-%m-%d").date()
+            filters.append("DATE(last_updated) >= %s")
+            params.append(data_inicio)
+        except ValueError:
+            data_inicio = None  # Ignora se for inválido
+
+    if data_fim:
+        try:
+            data_fim = datetime.strptime(data_fim, "%Y-%m-%d").date()
+            filters.append("DATE(last_updated) <= %s")
+            params.append(data_fim)
+        except ValueError:
+            data_fim = None  # Ignora se for inválido
+
+    # Construir query SQL
+    query = """
+    SELECT item_name, SUM(issue_quantity) AS total_retirado, MAX(last_updated) AS last_updated
+    FROM stockmgmgt_stock
+    WHERE issue_quantity > 0
+    """
+
+    if filters:
+        query += " AND " + " AND ".join(filters)
+
+    query += " GROUP BY item_name ORDER BY total_retirado DESC LIMIT %s;"
+    params.append(top_n)
+
+    # Executar a query e buscar os dados
+    with connection.cursor() as cursor:
+        cursor.execute(query, params)
+        rows = cursor.fetchall()
+
+    # Criar dataframe do Pandas
+    df = pd.DataFrame(rows, columns=['item_name', 'total_retirado', 'last_updated']) if rows else pd.DataFrame()
+
+    # Criar gráfico se houver dados
+    img = None
+    if not df.empty:
+        plt.figure(figsize=(10, 5))
+        plt.bar(df['item_name'], df['total_retirado'], color='blue')
+        plt.xlabel('Item')
+        plt.ylabel('Quantidade Retirada')
+        plt.title('Itens mais retirados')
+        plt.xticks(rotation=45)
+        plt.grid()
+
+        # Converter gráfico para imagem base64
+        buffer = io.BytesIO()
+        plt.savefig(buffer, format='png')
+        buffer.seek(0)
+        string = base64.b64encode(buffer.read()).decode('utf-8')
+        buffer.close()
+        img = f'data:image/png;base64,{string}'
+
+    return render(request, 'relatorio.html', {
+        'df': df.to_dict(orient='records'),
+        'img': img,
+        'data_inicio': data_inicio,
+        'data_fim': data_fim,
+        'top_n': top_n
+    })
+
+
+def buscar_endereco_cep(cep):
+    url = f"https://viacep.com.br/ws/{cep}/json/"
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json()
+    return None
+
+@login_required
+def cadastrar_pessoa(request):
+    if request.method == "POST":
+        nome = request.POST.get("nome")
+        email = request.POST.get("email")
+        telefone = request.POST.get("telefone")
+        cep = request.POST.get("cep")
+        numero = request.POST.get("numero")
+        complemento = request.POST.get("complemento")
+
+        endereco_info = buscar_endereco_cep(cep)
+
+        if endereco_info and "erro" not in endereco_info:
+            endereco = endereco_info.get("logradouro", "")
+            bairro = endereco_info.get("bairro", "")
+            cidade = endereco_info.get("localidade", "")
+            estado = endereco_info.get("uf", "")
+        else:
+            messages.error(request, "CEP inválido ou não encontrado.")
+            return redirect("/cadastrar_pessoa")
+
+        Cliente.objects.create(
+            nome=nome,
+            email=email,
+            telefone=telefone,
+            cep=cep,
+            endereco=endereco,
+            numero=numero,
+            complemento=complemento,
+            bairro=bairro,
+            cidade=cidade,
+            estado=estado
+        )
+
+        messages.success(request, "Pessoa cadastrada com sucesso!")
+        return redirect("/listar_pessoas")
+
+    return render(request, "cadastro_pessoa.html")
+
+@login_required
+def listar_pessoas(request):
+    pessoas = Cliente.objects.all()
+    return render(request, "listar_pessoas.html", {"pessoas": pessoas})
+
+
