@@ -21,6 +21,7 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
+from stockmgmgt.views import relatorio_itens_retirados
 
 
 
@@ -41,4 +42,8 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('list_items/', views.list_items, name='list_items'),
     path('barcode_items/', views.barcode_items, name='barcode_items'),
+    path('remove-item-from-list/<str:barcode>/', views.remove_item_from_list, name='remove_item_from_list'),
+    path('relatorio/', relatorio_itens_retirados, name='relatorio'),
+    path('cadastrar_pessoa/', views.cadastrar_pessoa, name='cadastrar_pessoa'),
+    path('listar_pessoas/', views.listar_pessoas, name='listar_pessoas'),
 ]   
